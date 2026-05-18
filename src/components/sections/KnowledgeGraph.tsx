@@ -211,9 +211,9 @@ export function KnowledgeGraph() {
                     <span className="text-[oklch(0.70_0_0)] break-all">{String(v as string)}</span>
                   </div>
                 ))}
-              {hoveredNode.properties.logoUrl && (
+              {typeof hoveredNode.properties.logoUrl === "string" && (
                 <img
-                  src={String(hoveredNode.properties.logoUrl)}
+                  src={hoveredNode.properties.logoUrl}
                   alt={hoveredNode.label}
                   className="w-6 h-6 rounded mt-1"
                   onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
