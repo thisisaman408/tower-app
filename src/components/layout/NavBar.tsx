@@ -23,8 +23,13 @@ export function NavBar() {
     router.push("/login");
   };
 
-  const dashboardHref = "/watchlists";
-  const graphHref = "/watchlists";
+  // Extract watchlist ID from current URL so Graph/Briefs nav goes to the right place
+  const watchlistIdMatch = pathname.match(/\/watchlists\/([a-f0-9-]{36})/);
+  const watchlistId = watchlistIdMatch?.[1] ?? null;
+
+  const dashboardHref = watchlistId ? `/watchlists/${watchlistId}` : "/watchlists";
+  const graphHref = watchlistId ? `/watchlists/${watchlistId}/graph` : "/watchlists";
+  const briefsHref = watchlistId ? `/briefs/${watchlistId}` : "/briefs";
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 border-b border-[oklch(0.22_0_0)] bg-[oklch(0.13_0_0/0.92)] backdrop-blur-md">
@@ -50,7 +55,6 @@ export function NavBar() {
             <BarChart2 size={13} />
             Dashboard
           </Link>
-          {/* KG Graph - resolved dynamically via watchlist redirect */}
           <Link
             href={graphHref}
             className={cn(
@@ -64,7 +68,7 @@ export function NavBar() {
             KG Graph
           </Link>
           <Link
-            href="/briefs"
+            href={briefsHref}
             className={cn(
               "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-150",
               pathname.startsWith("/briefs")
