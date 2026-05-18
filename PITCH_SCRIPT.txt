@@ -4,7 +4,9 @@ Transforming Enterprise Through AI | lablab.ai x TechEx
 
 [0:00–0:30] HOOK — THE PROBLEM
 ================================
-"Every startup founder is flying blind against their competition.
+"Hi, I'm Aman, and I built Tower.
+
+Every startup founder is flying blind against their competition.
 They're manually checking competitor websites, reading pricing pages,
 stalking LinkedIn — hours every week, still missing the signal that
 their biggest competitor just cut prices 25% or launched an AI feature
