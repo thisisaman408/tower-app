@@ -208,7 +208,7 @@ export function KnowledgeGraph() {
                 .map(([k, v]) => (
                   <div key={k} className="flex gap-2 text-xs">
                     <span className="text-[oklch(0.40_0_0)] font-mono w-20 flex-shrink-0">{k}:</span>
-                    <span className="text-[oklch(0.70_0_0)] break-all">{String(v)}</span>
+                    <span className="text-[oklch(0.70_0_0)] break-all">{String(v as string)}</span>
                   </div>
                 ))}
               {hoveredNode.properties.logoUrl && (
