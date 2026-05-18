@@ -1,7 +1,6 @@
 "use client";
 import dynamic from "next/dynamic";
-import { useState, useCallback, Component, type ReactNode } from "react";
-import { getDemoKGGraph } from "@/lib/seed-data";
+import { useState, useCallback, useEffect, Component, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import * as THREE from "three";
 import { motion } from "motion/react";
@@ -72,9 +71,18 @@ interface GraphLink {
 }
 
 export function KnowledgeGraph() {
-  const graphData = getDemoKGGraph();
+  const [graphData, setGraphData] = useState<{ nodes: GraphNode[]; links: GraphLink[] }>({ nodes: [], links: [] });
+  const [loading, setLoading] = useState(true);
   const [hoveredNode, setHoveredNode] = useState<GraphNode | null>(null);
   const [filterEdge, setFilterEdge] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/graph")
+      .then((r) => r.json())
+      .then((data) => setGraphData(data as { nodes: GraphNode[]; links: GraphLink[] }))
+      .catch(() => setGraphData({ nodes: [], links: [] }))
+      .finally(() => setLoading(false));
+  }, []);
 
   const filteredLinks = filterEdge
     ? graphData.links.filter((l) => l.relationship === filterEdge)
@@ -89,6 +97,14 @@ export function KnowledgeGraph() {
   const linkColor = useCallback((link: GraphLink) => {
     return EDGE_COLORS[link.relationship] ?? "#444444";
   }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-[560px] text-[oklch(0.45_0_0)] text-sm gap-2 rounded-xl border border-[oklch(0.22_0_0)] bg-[oklch(0.13_0_0)]">
+        <span className="animate-spin">⟳</span> Loading graph...
+      </div>
+    );
+  }
 
   return (
     <motion.div

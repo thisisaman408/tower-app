@@ -9,6 +9,7 @@ const STATIC_NAV_ITEMS = [
   { href: "/demo/extract", label: "Live Extract", icon: Zap },
   { href: "/alerts", label: "Alerts", icon: Bell },
   { href: "/security/lobster", label: "Lobster Trap", icon: Shield },
+  { href: "/settings/schedule", label: "Schedule", icon: Bell },
   { href: "/settings/keys", label: "Settings", icon: Settings },
 ];
 

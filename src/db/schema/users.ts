@@ -13,4 +13,7 @@ export const users = pgTable("users", {
   businessSummary: text("business_summary"),
   industry: text("industry"),
   onboardingComplete: boolean("onboarding_complete").notNull().default(false),
+  // Notifications
+  alertEmail: text("alert_email"),
+  scanScheduleHour: text("scan_schedule_hour").default("08"),
 });
