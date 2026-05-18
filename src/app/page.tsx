@@ -104,7 +104,7 @@ export default function HomePage() {
                 <ArrowRight size={14} />
               </Link>
               <Link
-                href="/watchlists/wl-demo-001"
+                href="/watchlists"
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm border border-[oklch(0.28_0_0)] text-[oklch(0.80_0_0)] hover:bg-[oklch(0.17_0_0)] transition-colors"
               >
                 <BarChart2 size={16} />
