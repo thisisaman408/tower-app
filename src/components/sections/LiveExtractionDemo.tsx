@@ -42,6 +42,8 @@ export function LiveExtractionDemo() {
   const [tokenBuffer, setTokenBuffer] = useState("");
   const [quarantineDetail, setQuarantineDetail] = useState<{ detectedText?: string } | null>(null);
   const [competitorAnalysis, setCompetitorAnalysis] = useState<{ isCompetitor: boolean; reason: string; companyName: string; suggestion: string } | null>(null);
+  const [addingCompetitor, setAddingCompetitor] = useState(false);
+  const [addedCompetitor, setAddedCompetitor] = useState(false);
 
   const runExtraction = useCallback(async (file?: File, sampleIdx?: number, url?: string) => {
     setPhase("lobster");
@@ -50,6 +52,7 @@ export function LiveExtractionDemo() {
     setLobsterPassed(false);
     setError(null);
     setCompetitorAnalysis(null);
+    setAddedCompetitor(false);
     setTokenBuffer("");
     setQuarantineDetail(null);
 
@@ -489,13 +492,43 @@ export function LiveExtractionDemo() {
                 ? "bg-[oklch(0.68_0.24_25/0.06)] border-[oklch(0.68_0.24_25/0.3)]"
                 : "bg-[oklch(0.71_0.22_145/0.06)] border-[oklch(0.71_0.22_145/0.3)]"
             )}>
-              <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-start justify-between gap-2 mb-2">
                 <span className="text-sm font-bold" style={{ color: competitorAnalysis.isCompetitor ? "oklch(0.68 0.24 25)" : "oklch(0.71 0.22 145)" }}>
                   {competitorAnalysis.isCompetitor ? "⚠ Competitor Detected" : "✓ Not a Direct Competitor"}
                 </span>
+                {competitorAnalysis.isCompetitor && !addedCompetitor && (
+                  <button
+                    onClick={async () => {
+                      setAddingCompetitor(true);
+                      try {
+                        // Get watchlist from current URL or from /api/watchlists
+                        const wlRes = await fetch("/api/watchlists");
+                        const wls = await wlRes.json() as Array<{ id: string }>;
+                        const watchlistId = wls[0]?.id;
+                        if (!watchlistId) throw new Error("No watchlist");
+                        const domain = (() => { try { return new URL(urlInput).hostname.replace("www.", ""); } catch { return urlInput; } })();
+                        await fetch(`/api/watchlists/${watchlistId}/competitors`, {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ name: competitorAnalysis.companyName, domain }),
+                        });
+                        setAddedCompetitor(true);
+                      } catch { /* ignore */ } finally {
+                        setAddingCompetitor(false);
+                      }
+                    }}
+                    disabled={addingCompetitor}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold bg-[oklch(0.72_0.16_240)] text-[oklch(0.13_0_0)] hover:bg-[oklch(0.78_0.16_240)] transition-colors disabled:opacity-50 flex-shrink-0"
+                  >
+                    {addingCompetitor ? "Adding..." : "+ Add to watchlist"}
+                  </button>
+                )}
+                {addedCompetitor && (
+                  <span className="text-xs text-[oklch(0.71_0.22_145)] flex-shrink-0 font-semibold">✓ Added!</span>
+                )}
               </div>
               <div className="text-xs text-[oklch(0.65_0_0)] mb-2 font-semibold">{competitorAnalysis.companyName}</div>
-              <div className="text-xs text-[oklch(0.55_0_0)] mb-2">{competitorAnalysis.reason}</div>
+              <div className="text-xs text-[oklch(0.55_0_0)] mb-1">{competitorAnalysis.reason}</div>
               {competitorAnalysis.suggestion && (
                 <div className="text-[10px] text-[oklch(0.45_0_0)] italic">{competitorAnalysis.suggestion}</div>
               )}
