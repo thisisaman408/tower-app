@@ -1,36 +1,64 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Tower — Gemini-Vision Competitive Intelligence
 
-## Getting Started
+> The autonomous market-intelligence analyst for founders. Drop competitors on a watchlist. Tower scans their pricing pages, careers, blog, and social daily. Gemini Vision reads the actual screenshots. A diff engine catches week-over-week change. A founder-grade Brief Writer auto-generates a 3-paragraph board memo. Slack fires on high-signal events.
 
-First, run the development server:
+## Demo
+
+**[tower-demo.vercel.app](https://tower-demo.vercel.app)** · No API key required for demo mode.
+
+### The 60-second killer moment
+1. Open `/demo/extract`
+2. Drop the `adversarial/injection-01.png` sample — watch Lobster Trap block it live
+3. Drop `hubspot/pricing/2026-05-13.png` — watch Gemini Vision extract every pricing tier in real-time JSON
+4. Navigate to `/watchlists/wl-demo-001` — see the weekly brief, diff viewer, and 3D knowledge graph
+
+## Features
+
+| Feature | Description |
+|---|---|
+| Gemini Vision Extraction | Drop a screenshot, get structured `Signal[]` via Gemini 2.0 Flash |
+| Diff Engine | Week-over-week semantic diff using pgvector cosine similarity |
+| Brief Writer | Weekly competitive memo via Gemini 2.0 Pro, Stratechery voice |
+| Lobster Trap | Image prompt-injection defense on every Gemini Vision call |
+| 3D Knowledge Graph | React Three Fiber + react-force-graph-3d, Neo4j-backed |
+| High-Signal Alerts | Slack + email on `impact >= 80` |
+| Public Share URLs | Read-only brief pages with Tower watermark |
+
+## Tech Stack
+
+- **Next.js 16** App Router + TypeScript 5
+- **Tailwind CSS v4** with dark-mode OKLCH design tokens
+- **Gemini 2.0 Flash** multimodal (extraction hero) + **Gemini 2.0 Flash** (briefs + KG)
+- **Drizzle ORM** + **Neon Postgres** + **pgvector** for signal dedup
+- **Neo4j AuraDB** for company knowledge graph
+- **Veea Lobster Trap** for image prompt-injection defense
+- **React Three Fiber** + **react-force-graph-3d** for 3D KG
+- **Inngest** for daily scanner jobs
+- **Vercel Blob** for screenshot storage
+- **Resend** for email alerts
+
+## Quick Start
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
+git clone https://github.com/your-handle/tower
+cd tower
+bun install
+cp .env.example .env.local
+# Add GEMINI_API_KEY to .env.local (get from aistudio.google.com)
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Architecture
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+See [SYSTEM-DESIGN.md](../SYSTEM-DESIGN.md) for the full system design including data models, pipeline specs, UI wireframes, and demo script.
 
-## Learn More
+## Prize Targets
 
-To learn more about Next.js, take a look at the following resources:
+- **Gemini Award** — Track 4: Data & Intelligence. Three Gemini surfaces (Flash multimodal, Flash Pro for briefs and KG). Screenshot extraction is the hero.
+- **Veea Award** — Lobster Trap image prompt-injection defense. Audit panel + adversarial demo corpus.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## License
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT

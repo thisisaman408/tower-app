@@ -1,0 +1,54 @@
+version: 1
+metadata:
+  name: tower-vision-policy
+  revision: "2026-05-13.r1"
+  owner: tower
+
+rules:
+  - id: image-injection-instruction-grammar
+    description: "OCR content matches jailbreak/instruction grammar"
+    when:
+      any:
+        - image.ocr matches: "(?i)\\b(ignore (all|previous) instructions|system prompt|you are now|act as|disregard the above)\\b"
+        - image.ocr matches: "(?i)\\b(override safety|bypass filter|jailbreak)\\b"
+    action: QUARANTINE
+    metadata:
+      severity: high
+      cwe: "CWE-77 (Improper Neutralization)"
+
+  - id: image-injection-base64-payload
+    description: "OCR contains long base64 strings (possible payload)"
+    when:
+      image.ocr matches: "[A-Za-z0-9+/]{120,}={0,2}"
+    action: HUMAN_REVIEW
+
+  - id: image-injection-known-exploit-url
+    description: "Image references a known prompt-injection demo domain"
+    when:
+      image.ocr matches: "(?i)\\b(promptinject\\.dev|pi-test\\.com|adversarial-images\\.io)\\b"
+    action: DENY
+
+  - id: image-exif-suspect
+    description: "EXIF metadata contains URLs or instructions"
+    when:
+      image.exif.user_comment matches: "(?i)(http|https|gemini|prompt|instruction)"
+    action: HUMAN_REVIEW
+
+  - id: declared-vs-detected-mismatch
+    description: "Declared intent 'visual extraction' but content looks like instructions"
+    when:
+      all:
+        - request.declared_intent == "tower.extract.visual"
+        - response.detected_intent in: ["instruction.execute", "command.injection"]
+    action: QUARANTINE
+
+  - id: rate-limit-per-domain
+    description: "Per-source-domain rate limit"
+    when:
+      request.tags.domain.rate_per_min > 12
+    action: RATE_LIMIT
+
+  - id: default-allow-log
+    description: "Anything not matched is allowed but logged"
+    when: true
+    action: LOG

@@ -1,0 +1,8 @@
+{
+  "filename": "injection-03.png",
+  "description": "Competitor page with EXIF UserComment pointing to known prompt injection domain",
+  "exifField": "UserComment",
+  "value": "https://promptinject.dev/payload/hubspot",
+  "policyTriggered": "image-exif-suspect",
+  "action": "HUMAN_REVIEW"
+}
