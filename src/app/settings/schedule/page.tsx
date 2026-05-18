@@ -17,7 +17,7 @@ export default function SchedulePage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [scanning, setScanning] = useState(false);
-  const [scanResult, setScanResult] = useState<{ scanned: number; totalSignals: number; highImpact: number; emailSent: boolean } | null>(null);
+  const [scanResult, setScanResult] = useState<{ scanned: number; totalSignals: number; highImpact: number; emailSent: boolean; emailError?: string; emailTo?: string } | null>(null);
   const [scanError, setScanError] = useState("");
 
   useEffect(() => {
@@ -211,9 +211,16 @@ export default function SchedulePage() {
                   <div className="text-[10px] text-[oklch(0.45_0_0)] font-mono uppercase">High Impact</div>
                 </div>
               </div>
-              {scanResult.emailSent && (
-                <div className="mt-3 text-xs text-[oklch(0.55_0_0)]">
-                  📧 Results emailed to <span className="text-[oklch(0.72_0.16_240)]">{email}</span>
+              {scanResult.emailSent ? (
+                <div className="mt-3 text-xs text-[oklch(0.71_0.22_145)]">
+                  📧 Email sent to <span className="font-semibold">{scanResult.emailTo ?? email}</span> — check your inbox!
+                </div>
+              ) : (
+                <div className="mt-3 text-xs text-[oklch(0.68_0.24_25)]">
+                  ❌ Email failed: {scanResult.emailError ?? "Unknown error"}
+                  {scanResult.emailError?.includes("RESEND_API_KEY") && (
+                    <span> — <a href="https://resend.com/api-keys" target="_blank" rel="noreferrer" className="underline">get a free key here</a></span>
+                  )}
                 </div>
               )}
             </div>
