@@ -41,6 +41,7 @@ export function LiveExtractionDemo() {
 
   const [tokenBuffer, setTokenBuffer] = useState("");
   const [quarantineDetail, setQuarantineDetail] = useState<{ detectedText?: string } | null>(null);
+  const [competitorAnalysis, setCompetitorAnalysis] = useState<{ isCompetitor: boolean; reason: string; companyName: string; suggestion: string } | null>(null);
 
   const runExtraction = useCallback(async (file?: File, sampleIdx?: number, url?: string) => {
     setPhase("lobster");
@@ -48,6 +49,7 @@ export function LiveExtractionDemo() {
     setLobsterChecks([]);
     setLobsterPassed(false);
     setError(null);
+    setCompetitorAnalysis(null);
     setTokenBuffer("");
     setQuarantineDetail(null);
 
@@ -122,6 +124,14 @@ export function LiveExtractionDemo() {
               }, 800);
             } else if (evtName === "done") {
               setPhase("done");
+              // Run competitor analysis after extraction
+              if (url) {
+                fetch("/api/competitor/classify", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ url }),
+                }).then(r => r.json()).then(d => setCompetitorAnalysis(d as typeof competitorAnalysis)).catch(() => null);
+              }
             } else if (evtName === "error") {
               setError((data as { message: string }).message);
               setPhase("done");
@@ -457,12 +467,47 @@ export function LiveExtractionDemo() {
             );
           })}
 
+          {phase === "done" && signals.length === 0 && !error && (
+            <div className="p-4 rounded-lg bg-[oklch(0.18_0_0)] border border-[oklch(0.25_0_0)] mb-4">
+              <div className="text-[oklch(0.65_0_0)] text-xs font-semibold mb-1">No structured signals extracted</div>
+              <div className="text-[oklch(0.40_0_0)] text-[10px] leading-relaxed">
+                This page may be a web app, login page, or behind auth. Try the pricing or blog page directly (e.g. <span className="font-mono">clickup.com/pricing</span>).
+              </div>
+              {tokenBuffer && (
+                <div className="mt-3 pt-3 border-t border-[oklch(0.22_0_0)]">
+                  <div className="text-[10px] font-mono text-[oklch(0.35_0_0)] mb-1">Raw Gemini response:</div>
+                  <div className="text-[oklch(0.45_0_0)] text-[10px] break-all leading-relaxed max-h-32 overflow-y-auto">{tokenBuffer}</div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {competitorAnalysis && phase === "done" && (
+            <div className={cn(
+              "p-4 rounded-lg border mb-4",
+              competitorAnalysis.isCompetitor
+                ? "bg-[oklch(0.68_0.24_25/0.06)] border-[oklch(0.68_0.24_25/0.3)]"
+                : "bg-[oklch(0.71_0.22_145/0.06)] border-[oklch(0.71_0.22_145/0.3)]"
+            )}>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-sm font-bold" style={{ color: competitorAnalysis.isCompetitor ? "oklch(0.68 0.24 25)" : "oklch(0.71 0.22 145)" }}>
+                  {competitorAnalysis.isCompetitor ? "⚠ Competitor Detected" : "✓ Not a Direct Competitor"}
+                </span>
+              </div>
+              <div className="text-xs text-[oklch(0.65_0_0)] mb-2 font-semibold">{competitorAnalysis.companyName}</div>
+              <div className="text-xs text-[oklch(0.55_0_0)] mb-2">{competitorAnalysis.reason}</div>
+              {competitorAnalysis.suggestion && (
+                <div className="text-[10px] text-[oklch(0.45_0_0)] italic">{competitorAnalysis.suggestion}</div>
+              )}
+            </div>
+          )}
+
           {(phase === "extracting" || (phase === "done" && signals.length > 0)) && (
             <div className="text-[oklch(0.35_0_0)]">
               {phase === "extracting" && <span className="text-[oklch(0.72_0.16_240)] animate-pulse">▋</span>}
-              {phase === "done" && (
+              {phase === "done" && signals.length > 0 && (
                 <div className="text-[oklch(0.40_0_0)] text-[10px] pt-2 border-t border-[oklch(0.20_0_0)]">
-                  ✓ Extraction complete · model: gemini-2.0-flash · {signals.length} signals
+                  ✓ Extraction complete · {signals.length} signals
                 </div>
               )}
             </div>
