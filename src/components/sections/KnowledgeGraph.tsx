@@ -203,14 +203,22 @@ export function KnowledgeGraph() {
             </div>
             <div className="space-y-1">
               {Object.entries(hoveredNode.properties)
-                .filter(([, v]) => v !== undefined && v !== null)
-                .slice(0, 5)
+                .filter(([k, v]) => v !== undefined && v !== null && !["watchlistId", "id", "logoUrl"].includes(k))
+                .slice(0, 4)
                 .map(([k, v]) => (
                   <div key={k} className="flex gap-2 text-xs">
                     <span className="text-[oklch(0.40_0_0)] font-mono w-20 flex-shrink-0">{k}:</span>
                     <span className="text-[oklch(0.70_0_0)] break-all">{String(v)}</span>
                   </div>
                 ))}
+              {hoveredNode.properties.logoUrl && (
+                <img
+                  src={String(hoveredNode.properties.logoUrl)}
+                  alt={hoveredNode.label}
+                  className="w-6 h-6 rounded mt-1"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                />
+              )}
             </div>
           </div>
         )}
