@@ -71,7 +71,16 @@ export default function WatchlistPage({ params }: { params: Promise<{ id: string
       {competitors.length === 0 ? (
         <div className="rounded-xl border border-dashed border-[oklch(0.28_0_0)] p-12 text-center">
           <div className="text-[oklch(0.40_0_0)] mb-2">No competitors yet</div>
-          <div className="text-xs text-[oklch(0.35_0_0)]">Add competitors to start tracking them</div>
+          <div className="text-xs text-[oklch(0.35_0_0)] mb-4">Use "+ Add Competitor" above, or re-run setup to auto-discover them</div>
+          <button
+            onClick={async () => {
+              await fetch("/api/onboard/reset", { method: "POST" });
+              window.location.href = "/onboarding";
+            }}
+            className="text-xs text-[oklch(0.72_0.16_240)] hover:text-[oklch(0.85_0.16_240)] transition-colors underline"
+          >
+            Re-run competitor discovery →
+          </button>
         </div>
       ) : (
         <StaggerContainer className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 mb-8" staggerDelay={0.05}>
