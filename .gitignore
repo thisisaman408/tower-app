@@ -41,3 +41,11 @@ yarn-error.log*
 next-env.d.ts
 .claude/
 package-lock.json
+
+# screenshots, images, pdfs dumped in repo root
+*.png
+*.jpg
+*.jpeg
+*.pdf
+*.PNG
+*.JPG
