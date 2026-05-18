@@ -1,193 +1,161 @@
 "use client";
 import { PageShell } from "@/components/layout/PageShell";
-import { DEMO_LOBSTER_EVENTS } from "@/lib/seed-data";
-import { formatRelative, cn } from "@/lib/utils";
-import { Shield, Download, AlertTriangle, CheckCircle, Clock, Eye } from "lucide-react";
+import { Shield, AlertTriangle, CheckCircle, Zap, Lock, Eye, FileSearch, Cpu } from "lucide-react";
 import { FadeInUp, StaggerContainer } from "@/components/animations";
+import Link from "next/link";
 
-const ACTION_STYLES: Record<string, { color: string; bg: string; icon: typeof Shield }> = {
-  QUARANTINE: { color: "text-[oklch(0.68_0.24_25)]", bg: "bg-[oklch(0.68_0.24_25/0.1)] border-[oklch(0.68_0.24_25/0.3)]", icon: AlertTriangle },
-  HUMAN_REVIEW: { color: "text-[oklch(0.82_0.20_85)]", bg: "bg-[oklch(0.82_0.20_85/0.1)] border-[oklch(0.82_0.20_85/0.3)]", icon: Eye },
-  ALLOW: { color: "text-[oklch(0.71_0.22_145)]", bg: "bg-[oklch(0.71_0.22_145/0.08)] border-[oklch(0.71_0.22_145/0.2)]", icon: CheckCircle },
-  DENY: { color: "text-[oklch(0.68_0.24_25)]", bg: "bg-[oklch(0.68_0.24_25/0.12)] border-[oklch(0.68_0.24_25/0.3)]", icon: AlertTriangle },
-  LOG: { color: "text-[oklch(0.45_0_0)]", bg: "bg-[oklch(0.45_0_0/0.08)] border-[oklch(0.45_0_0/0.2)]", icon: Clock },
+const POLICIES = [
+  {
+    id: "image-injection-instruction-grammar",
+    name: "Prompt Injection Guard",
+    desc: "Detects embedded instructions in screenshots (e.g. 'ignore previous instructions', 'act as', 'system:') that could hijack Gemini extraction.",
+    status: "ACTIVE",
+    severity: "critical",
+    icon: AlertTriangle,
+  },
+  {
+    id: "image-exif-suspect",
+    name: "EXIF Metadata Scan",
+    desc: "Inspects image EXIF data for hidden payloads or unusual metadata that could carry adversarial content.",
+    status: "ACTIVE",
+    severity: "high",
+    icon: FileSearch,
+  },
+  {
+    id: "declared-vs-detected-mismatch",
+    name: "Content Mismatch Check",
+    desc: "Compares declared page type (pricing, blog, careers) against detected content. Flags suspicious mismatches.",
+    status: "ACTIVE",
+    severity: "medium",
+    icon: Eye,
+  },
+  {
+    id: "output-schema-enforcement",
+    name: "Output Schema Enforcement",
+    desc: "Validates all Gemini responses against a strict signal schema. Rejects any output that deviates from the expected format.",
+    status: "ACTIVE",
+    severity: "medium",
+    icon: Cpu,
+  },
+  {
+    id: "rate-limit-abuse",
+    name: "Extraction Rate Limiter",
+    desc: "Prevents abuse of the Gemini Vision API. Limits extraction requests per session and blocks automated mass extraction attempts.",
+    status: "ACTIVE",
+    severity: "low",
+    icon: Lock,
+  },
+];
+
+const SEVERITY_COLORS = {
+  critical: { dot: "bg-[oklch(0.68_0.24_25)]", badge: "text-[oklch(0.68_0.24_25)] bg-[oklch(0.68_0.24_25/0.1)] border-[oklch(0.68_0.24_25/0.3)]" },
+  high: { dot: "bg-[oklch(0.82_0.20_85)]", badge: "text-[oklch(0.82_0.20_85)] bg-[oklch(0.82_0.20_85/0.1)] border-[oklch(0.82_0.20_85/0.3)]" },
+  medium: { dot: "bg-[oklch(0.72_0.16_240)]", badge: "text-[oklch(0.72_0.16_240)] bg-[oklch(0.72_0.16_240/0.1)] border-[oklch(0.72_0.16_240/0.2)]" },
+  low: { dot: "bg-[oklch(0.71_0.22_145)]", badge: "text-[oklch(0.71_0.22_145)] bg-[oklch(0.71_0.22_145/0.1)] border-[oklch(0.71_0.22_145/0.2)]" },
 };
 
 export default function LobsterAuditPage() {
-  const events = DEMO_LOBSTER_EVENTS;
-  const quarantined = events.filter((e) => e.action === "QUARANTINE").length;
-  const humanReview = events.filter((e) => e.action === "HUMAN_REVIEW").length;
-  const allowed = events.filter((e) => e.action === "ALLOW" || e.action === "LOG").length;
-
   return (
     <PageShell>
-      <div className="mb-8 flex items-start justify-between">
-        <div>
+      <FadeInUp>
+        <div className="mb-8">
           <div className="text-xs font-mono text-[oklch(0.45_0_0)] mb-1">TOWER / SECURITY</div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Shield size={22} className="text-[oklch(0.72_0.16_240)]" />
-            Lobster Trap Audit
+            Lobster Trap
           </h1>
           <p className="text-sm text-[oklch(0.50_0_0)] mt-1">
-            Deep-packet inspection on every Gemini Vision call. Image prompt-injection defense.
+            Prompt injection defense layer. Every Gemini Vision call passes through these policies before extraction begins.
           </p>
         </div>
-        <button
-          onClick={() => {
-            const blob = new Blob([JSON.stringify(DEMO_LOBSTER_EVENTS, null, 2)], { type: "application/json" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `tower-lobster-audit-${new Date().toISOString().slice(0, 10)}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-          }}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs border border-[oklch(0.28_0_0)] text-[oklch(0.65_0_0)] hover:bg-[oklch(0.17_0_0)] transition-colors"
-        >
-          <Download size={12} />
-          Export JSON
-        </button>
-      </div>
+      </FadeInUp>
 
-      {/* Stats */}
-      <StaggerContainer className="grid grid-cols-4 gap-4 mb-8" staggerDelay={0.07}>
-        {[
-          { label: "Total Events", value: events.length, color: "text-[oklch(0.80_0_0)]" },
-          { label: "Quarantined", value: quarantined, color: "text-[oklch(0.68_0.24_25)]" },
-          { label: "Human Review", value: humanReview, color: "text-[oklch(0.82_0.20_85)]" },
-          { label: "Passed", value: allowed, color: "text-[oklch(0.71_0.22_145)]" },
-        ].map(({ label, value, color }) => (
-          <div key={label} className="rounded-xl border border-[oklch(0.22_0_0)] bg-[oklch(0.15_0_0)] p-5">
-            <div className={cn("text-3xl font-bold font-mono mb-1", color)}>{value}</div>
-            <div className="text-xs text-[oklch(0.40_0_0)] font-mono uppercase">{label}</div>
+      {/* Status banner */}
+      <FadeInUp delay={0.05}>
+        <div className="flex items-center gap-3 p-4 rounded-xl border border-[oklch(0.71_0.22_145/0.3)] bg-[oklch(0.71_0.22_145/0.05)] mb-8">
+          <div className="w-2 h-2 rounded-full bg-[oklch(0.71_0.22_145)] animate-pulse" />
+          <div>
+            <div className="text-sm font-semibold text-[oklch(0.71_0.22_145)]">All systems operational</div>
+            <div className="text-xs text-[oklch(0.45_0_0)]">{POLICIES.length} active policies · 0 incidents · monitoring every Gemini call</div>
           </div>
-        ))}
+          <div className="ml-auto text-xs font-mono text-[oklch(0.35_0_0)]">policy v2026-05-19</div>
+        </div>
+      </FadeInUp>
+
+      {/* How it works */}
+      <FadeInUp delay={0.08}>
+        <div className="mb-8 p-5 rounded-xl border border-[oklch(0.22_0_0)] bg-[oklch(0.15_0_0)]">
+          <h2 className="text-sm font-semibold mb-3 flex items-center gap-2">
+            <Zap size={14} className="text-[oklch(0.82_0.20_85)]" />
+            How Lobster Trap protects your extractions
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {[
+              { step: "1", title: "Intercept", desc: "Every screenshot or URL submitted to Tower is intercepted before reaching Gemini." },
+              { step: "2", title: "Inspect", desc: "All 5 policies run in parallel — EXIF scan, injection grammar check, schema validation." },
+              { step: "3", title: "Allow or Quarantine", desc: "Clean requests proceed to Gemini. Adversarial content is quarantined with full audit trail." },
+            ].map((item) => (
+              <div key={item.step} className="flex gap-3">
+                <div className="w-6 h-6 rounded-full bg-[oklch(0.72_0.16_240/0.15)] border border-[oklch(0.72_0.16_240/0.3)] flex items-center justify-center flex-shrink-0 text-[11px] font-mono text-[oklch(0.72_0.16_240)]">
+                  {item.step}
+                </div>
+                <div>
+                  <div className="text-xs font-semibold text-[oklch(0.80_0_0)] mb-0.5">{item.title}</div>
+                  <div className="text-xs text-[oklch(0.45_0_0)]">{item.desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </FadeInUp>
+
+      {/* Active policies */}
+      <FadeInUp delay={0.1}>
+        <h2 className="text-sm font-semibold mb-3 text-[oklch(0.65_0_0)] uppercase font-mono tracking-wide">Active Policies</h2>
+      </FadeInUp>
+      <StaggerContainer className="space-y-3 mb-8" staggerDelay={0.05}>
+        {POLICIES.map((policy) => {
+          const Icon = policy.icon;
+          const colors = SEVERITY_COLORS[policy.severity as keyof typeof SEVERITY_COLORS];
+          return (
+            <div key={policy.id} className="flex gap-4 p-4 rounded-xl border border-[oklch(0.22_0_0)] bg-[oklch(0.15_0_0)]">
+              <div className="w-9 h-9 rounded-lg bg-[oklch(0.72_0.16_240/0.1)] border border-[oklch(0.72_0.16_240/0.2)] flex items-center justify-center flex-shrink-0">
+                <Icon size={16} className="text-[oklch(0.72_0.16_240)]" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-sm font-semibold text-[oklch(0.88_0_0)]">{policy.name}</span>
+                  <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded border ${colors.badge}`}>
+                    {policy.severity}
+                  </span>
+                  <span className="ml-auto text-[10px] font-mono text-[oklch(0.71_0.22_145)] flex items-center gap-1">
+                    <CheckCircle size={10} /> ACTIVE
+                  </span>
+                </div>
+                <p className="text-xs text-[oklch(0.50_0_0)]">{policy.desc}</p>
+                <div className="mt-1.5 text-[10px] font-mono text-[oklch(0.30_0_0)]">{policy.id}</div>
+              </div>
+            </div>
+          );
+        })}
       </StaggerContainer>
 
-      {/* Policy info */}
-      <div className="rounded-xl border border-[oklch(0.72_0.16_240/0.2)] bg-[oklch(0.72_0.16_240/0.03)] p-5 mb-6">
-        <div className="flex items-center gap-2 mb-3">
-          <Shield size={14} className="text-[oklch(0.72_0.16_240)]" />
-          <span className="text-sm font-semibold text-[oklch(0.72_0.16_240)]">Active Policy</span>
-          <span className="ml-auto text-xs font-mono text-[oklch(0.45_0_0)]">tower-vision-policy · v2026-05-13.r1</span>
+      {/* Try it */}
+      <FadeInUp delay={0.15}>
+        <div className="p-5 rounded-xl border border-dashed border-[oklch(0.28_0_0)]">
+          <div className="text-sm font-semibold mb-1">Try the adversarial demo</div>
+          <p className="text-xs text-[oklch(0.45_0_0)] mb-3">
+            Go to Live Extract, click the red "adversarial/injection-01.png" sample and watch Lobster Trap block it in real time.
+          </p>
+          <Link
+            href="/demo/extract"
+            className="inline-flex items-center gap-1.5 text-xs text-[oklch(0.72_0.16_240)] hover:text-[oklch(0.85_0.16_240)] transition-colors"
+          >
+            <Zap size={11} />
+            Open Live Extract →
+          </Link>
         </div>
-        <div className="grid grid-cols-2 gap-3 text-xs">
-          {[
-            { id: "image-injection-instruction-grammar", action: "QUARANTINE", desc: "OCR matches jailbreak/instruction grammar" },
-            { id: "image-injection-base64-payload", action: "HUMAN_REVIEW", desc: "Long base64 strings in OCR output" },
-            { id: "image-injection-known-exploit-url", action: "DENY", desc: "Known prompt-injection domain in image" },
-            { id: "image-exif-suspect", action: "HUMAN_REVIEW", desc: "EXIF metadata contains URLs or instructions" },
-            { id: "declared-vs-detected-mismatch", action: "QUARANTINE", desc: "Intent mismatch: visual extraction ≠ detected" },
-            { id: "rate-limit-per-domain", action: "RATE_LIMIT", desc: "Per-domain rate limit: >12/min" },
-          ].map((rule) => {
-            const style = ACTION_STYLES[rule.action] ?? ACTION_STYLES.LOG;
-            return (
-              <div key={rule.id} className="flex items-start gap-2.5 p-3 rounded-lg bg-[oklch(0.17_0_0)] border border-[oklch(0.22_0_0)]">
-                <span className={cn("text-[10px] font-mono px-1.5 py-0.5 rounded border flex-shrink-0 mt-0.5", style.color, style.bg)}>
-                  {rule.action}
-                </span>
-                <div>
-                  <div className="font-mono text-[oklch(0.55_0_0)] text-[10px]">{rule.id}</div>
-                  <div className="text-[oklch(0.45_0_0)] text-[10px] mt-0.5">{rule.desc}</div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Event log */}
-      <div className="rounded-xl border border-[oklch(0.22_0_0)] overflow-hidden">
-        <div className="px-5 py-3.5 border-b border-[oklch(0.22_0_0)] bg-[oklch(0.15_0_0)]">
-          <h2 className="text-sm font-semibold">Event Log · Past 24h</h2>
-        </div>
-        <div className="divide-y divide-[oklch(0.20_0_0)]">
-          {events.map((ev) => {
-            const style = ACTION_STYLES[ev.action] ?? ACTION_STYLES.LOG;
-            const Icon = style.icon;
-            return (
-              <div key={ev.id} className="px-5 py-4 hover:bg-[oklch(0.15_0_0)] transition-colors bg-[oklch(0.13_0_0)]">
-                <div className="flex items-start gap-3">
-                  <Icon size={14} className={cn("mt-0.5 flex-shrink-0", style.color)} />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                      <span className={cn(
-                        "text-[10px] font-mono px-2 py-0.5 rounded border font-semibold",
-                        style.color, style.bg
-                      )}>
-                        {ev.action}
-                      </span>
-                      <span className="text-xs font-mono text-[oklch(0.50_0_0)]">{ev.policyId}</span>
-                      <span className="ml-auto text-[10px] font-mono text-[oklch(0.38_0_0)]">
-                        {formatRelative(ev.occurredAt)}
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px] font-mono">
-                      <div>
-                        <span className="text-[oklch(0.38_0_0)]">request: </span>
-                        <span className="text-[oklch(0.55_0_0)]">{ev.requestId}</span>
-                      </div>
-                      {ev.payloadRedacted && (
-                        <div>
-                          <span className="text-[oklch(0.38_0_0)]">domain: </span>
-                          <span className="text-[oklch(0.55_0_0)]">{String(ev.payloadRedacted.domain ?? "")}</span>
-                        </div>
-                      )}
-                      {ev.declaredIntent && (
-                        <div>
-                          <span className="text-[oklch(0.38_0_0)]">declared: </span>
-                          <span className="text-[oklch(0.55_0_0)]">{ev.declaredIntent}</span>
-                        </div>
-                      )}
-                      {ev.detectedIntent && (
-                        <div>
-                          <span className="text-[oklch(0.38_0_0)]">detected: </span>
-                          <span className={ev.action === "QUARANTINE" ? "text-[oklch(0.68_0.24_25)]" : "text-[oklch(0.82_0.20_85)]"}>
-                            {ev.detectedIntent}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    {ev.evidence && (
-                      <div className="mt-2 p-2.5 rounded bg-[oklch(0.18_0_0)] border border-[oklch(0.22_0_0)]">
-                        <div className="text-[10px] font-mono text-[oklch(0.40_0_0)] mb-1">Evidence:</div>
-                        {ev.evidence.ocrMatch != null && (
-                          <div className="text-[10px] font-mono text-[oklch(0.65_0_0)] break-all">
-                            OCR: &quot;{String(ev.evidence.ocrMatch).slice(0, 80)}&quot;
-                          </div>
-                        )}
-                        {ev.evidence.exifField != null && (
-                          <div className="text-[10px] font-mono text-[oklch(0.65_0_0)]">
-                            EXIF.{String(ev.evidence.exifField)}: {String(ev.evidence.value ?? "").slice(0, 60)}
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {(ev.action === "QUARANTINE" || ev.action === "DENY") && (
-                      <div className="mt-2 text-[10px] font-mono text-[oklch(0.45_0_0)]">
-                        → action: fallback to HTML-only extraction path (degraded mode)
-                      </div>
-                    )}
-                    {ev.action === "HUMAN_REVIEW" && (
-                      <div className="flex items-center gap-2 mt-2">
-                        <button className="text-[10px] px-2 py-0.5 rounded bg-[oklch(0.71_0.22_145/0.1)] text-[oklch(0.71_0.22_145)] border border-[oklch(0.71_0.22_145/0.2)] font-mono hover:bg-[oklch(0.71_0.22_145/0.15)] transition-colors">
-                          approve ▸
-                        </button>
-                        <button className="text-[10px] px-2 py-0.5 rounded bg-[oklch(0.68_0.24_25/0.1)] text-[oklch(0.68_0.24_25)] border border-[oklch(0.68_0.24_25/0.2)] font-mono hover:bg-[oklch(0.68_0.24_25/0.15)] transition-colors">
-                          deny ▸
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+      </FadeInUp>
     </PageShell>
   );
 }
