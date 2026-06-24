@@ -451,7 +451,7 @@ export function LiveExtractionDemo() {
                 {isExpanded && (
                   <div className="px-4 pb-3 space-y-1.5 border-t border-[oklch(0.20_0_0)]">
                     <div className="pt-2">
-                      {Object.entries(signal.payload).map(([k, v]) => (
+                      {Object.entries(signal.payload || {}).map(([k, v]) => (
                         <div key={k} className="flex gap-2">
                           <span className="text-[oklch(0.72_0.16_240)] min-w-28 flex-shrink-0">{k}:</span>
                           <span className="text-[oklch(0.80_0_0)] break-all">
